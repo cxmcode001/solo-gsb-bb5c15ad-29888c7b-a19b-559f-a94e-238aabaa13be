@@ -15,6 +15,8 @@ import type { FailureScenario } from '../lib/resilience';
 import ClusterTable, { type ClusterFilter } from './ClusterTable';
 import ResiliencePanel from './ResiliencePanel';
 import BaselineCompare from './BaselineCompare';
+import BudgetPanel from './BudgetPanel';
+import type { PatchScenarioInfo } from '../lib/patching';
 import type { ParsedBaseline } from '../lib/baseline';
 
 /** 场景集求解视图模型（App 按场景分组计算后传入） */
@@ -45,6 +47,11 @@ interface SetResultsPanelProps {
   resilience: FailureScenario[];
   /** 构建场景集 JSON 报告所需的求解视图模型 */
   resultScenarios: ScenarioResultData[];
+  /** 参与本次求解的场景（按清单顺序），供补字预算规划逐场景统计 */
+  patchScenarios: PatchScenarioInfo[];
+  /** 每种有效字体的原始偏好位次（与 validFonts 对齐） */
+  preference: number[];
+  ignoreFormat: boolean;
 }
 
 /**
@@ -70,6 +77,9 @@ export default function SetResultsPanel(props: SetResultsPanelProps) {
     useMeasured,
     resilience,
     resultScenarios,
+    patchScenarios,
+    preference,
+    ignoreFormat,
   } = props;
 
   const [filter, setFilter] = useState<ClusterFilter>('all');
@@ -288,6 +298,18 @@ export default function SetResultsPanel(props: SetResultsPanelProps) {
           />
         </section>
       )}
+
+      <section className="block">
+        <BudgetPanel
+          clusters={allClusters}
+          validFonts={validFonts}
+          preference={preference}
+          scenarios={patchScenarios}
+          mode="set"
+          ignoreFormatCodepoints={ignoreFormat}
+          useMeasuredCoverage={useMeasured}
+        />
+      </section>
 
       <section className="block">
         <h3>逐场景结果</h3>

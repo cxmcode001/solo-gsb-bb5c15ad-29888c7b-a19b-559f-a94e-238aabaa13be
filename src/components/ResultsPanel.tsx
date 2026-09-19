@@ -14,6 +14,8 @@ import type { FailureScenario } from '../lib/resilience';
 import ClusterTable, { type ClusterFilter } from './ClusterTable';
 import ResiliencePanel from './ResiliencePanel';
 import BaselineCompare from './BaselineCompare';
+import BudgetPanel from './BudgetPanel';
+import type { PatchScenarioInfo } from '../lib/patching';
 import type { ParsedBaseline } from '../lib/baseline';
 
 interface ResultsPanelProps {
@@ -29,6 +31,11 @@ interface ResultsPanelProps {
   hasText: boolean;
   useMeasured: boolean;
   resilience: FailureScenario[];
+  /** 参与本次求解的场景（单场景模式仅一项），供补字预算规划逐场景统计 */
+  patchScenarios: PatchScenarioInfo[];
+  /** 每种有效字体的原始偏好位次（与 validFonts 对齐） */
+  preference: number[];
+  ignoreFormat: boolean;
 }
 
 /** 结果区：概览、回退链、缺失告警、字素簇明细、导出 */
@@ -46,6 +53,9 @@ export default function ResultsPanel(props: ResultsPanelProps) {
     hasText,
     useMeasured,
     resilience,
+    patchScenarios,
+    preference,
+    ignoreFormat,
   } = props;
 
   const [filter, setFilter] = useState<ClusterFilter>('all');
@@ -209,6 +219,18 @@ export default function ResultsPanel(props: ResultsPanelProps) {
           />
         </section>
       )}
+
+      <section className="block">
+        <BudgetPanel
+          clusters={clusters}
+          validFonts={validFonts}
+          preference={preference}
+          scenarios={patchScenarios}
+          mode="single"
+          ignoreFormatCodepoints={ignoreFormat}
+          useMeasuredCoverage={useMeasured}
+        />
+      </section>
 
       <section className="block">
         <BaselineCompare

@@ -34,6 +34,7 @@ import FontEditor from './components/FontEditor';
 import ScenarioEditor from './components/ScenarioEditor';
 import ResultsPanel from './components/ResultsPanel';
 import SetResultsPanel, { type ScenarioView } from './components/SetResultsPanel';
+import type { PatchScenarioInfo } from './lib/patching';
 
 /** 文件大小上限 20 MB（防止误选超大文件卡死浏览器解析） */
 const MAX_FONT_BYTES = 20 * 1024 * 1024;
@@ -254,6 +255,22 @@ export default function App() {
       flatClusters,
       solution.selected,
     ],
+  );
+
+  // ---- 补字预算规划：参与求解的场景元数据（单场景仅活动场景） ----
+  const patchScenarios: PatchScenarioInfo[] = useMemo(
+    () =>
+      solveGroups.map((g) => {
+        const idx = scenarios.findIndex((s) => s.id === g.scenarioId);
+        const spec = scenarios[idx];
+        return {
+          id: g.scenarioId,
+          name: spec
+            ? scenarioDisplayName(spec, idx)
+            : '',
+        };
+      }),
+    [solveGroups, scenarios],
   );
 
   const auditInput: AuditInput = useMemo(
@@ -536,6 +553,9 @@ export default function App() {
               hasText={activeText.length > 0}
               useMeasured={useMeasured}
               resilience={resilience}
+              patchScenarios={patchScenarios}
+              preference={validEntries.map((e) => e.order)}
+              ignoreFormat={ignoreFormat}
             />
           ) : (
             <SetResultsPanel
@@ -559,6 +579,9 @@ export default function App() {
                 clusters: v.clusters,
                 chainCounts: v.chainCounts,
               }))}
+              patchScenarios={patchScenarios}
+              preference={validEntries.map((e) => e.order)}
+              ignoreFormat={ignoreFormat}
             />
           )}
         </section>

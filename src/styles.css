@@ -1408,3 +1408,123 @@ code {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ---- 补字预算规划 ---- */
+.budget-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 10px 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--panel-2);
+}
+
+.budget-input-label {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.budget-input {
+  width: 110px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.budget-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.budget-error {
+  color: var(--bad);
+}
+
+.budget-stat-grid {
+  margin: 10px 0 12px;
+}
+
+.budget-table-wrap {
+  margin: 8px 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.budget-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.budget-font-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.budget-section-title {
+  margin: 6px 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.budget-font-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 9px;
+  background: var(--panel-2);
+}
+
+.budget-cp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.budget-cp-chip {
+  padding: 1px 7px;
+  border-radius: 5px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.budget-rounds summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.budget-rounds summary:hover {
+  color: var(--accent);
+}
+
+.budget-step-cps {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  white-space: normal;
+  word-break: break-all;
+}
+
+.budget-section {
+  margin-top: 10px;
+}
