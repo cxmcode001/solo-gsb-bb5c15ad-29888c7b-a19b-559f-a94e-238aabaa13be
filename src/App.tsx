@@ -435,6 +435,12 @@ export default function App() {
     [chain],
   );
 
+  // 场景 id -> 显示名（补字预算规划的逐场景统计用；单场景模式仅活动场景会被查询）
+  const scenarioNameMap = useMemo(
+    () => new Map(scenarioViews.map((v) => [v.id, v.name])),
+    [scenarioViews],
+  );
+
   return (
     <div className="app">
       <header className="app-header">
@@ -536,6 +542,7 @@ export default function App() {
               hasText={activeText.length > 0}
               useMeasured={useMeasured}
               resilience={resilience}
+              scenarioNames={scenarioNameMap}
             />
           ) : (
             <SetResultsPanel

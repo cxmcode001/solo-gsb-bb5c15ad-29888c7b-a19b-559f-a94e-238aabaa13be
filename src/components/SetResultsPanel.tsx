@@ -14,6 +14,7 @@ import { displayCluster, formatCodepoint } from '../lib/grapheme';
 import type { FailureScenario } from '../lib/resilience';
 import ClusterTable, { type ClusterFilter } from './ClusterTable';
 import ResiliencePanel from './ResiliencePanel';
+import PatchPlannerPanel from './PatchPlannerPanel';
 import BaselineCompare from './BaselineCompare';
 import type { ParsedBaseline } from '../lib/baseline';
 
@@ -285,6 +286,18 @@ export default function SetResultsPanel(props: SetResultsPanelProps) {
             auditInput={auditInput}
             generatedAt={generatedAt}
             scenarioNames={new Map(scenarios.map((s) => [s.id, s.name]))}
+          />
+        </section>
+      )}
+
+      {allClusters.length > 0 && (
+        <section className="block">
+          <PatchPlannerPanel
+            clusters={allClusters}
+            validFonts={validFonts}
+            auditInput={auditInput}
+            generatedAt={generatedAt}
+            scenarioNames={nameById}
           />
         </section>
       )}

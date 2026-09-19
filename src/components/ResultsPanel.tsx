@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { ClusterAudit, ParsedFont } from '../types';
+import type { ParsedFont, ScenarioClusterAudit } from '../types';
 import type { ChainEntry } from '../lib/audit';
 import {
   buildAuditReport,
@@ -13,11 +13,12 @@ import { displayCluster, formatCodepoint } from '../lib/grapheme';
 import type { FailureScenario } from '../lib/resilience';
 import ClusterTable, { type ClusterFilter } from './ClusterTable';
 import ResiliencePanel from './ResiliencePanel';
+import PatchPlannerPanel from './PatchPlannerPanel';
 import BaselineCompare from './BaselineCompare';
 import type { ParsedBaseline } from '../lib/baseline';
 
 interface ResultsPanelProps {
-  clusters: ClusterAudit[];
+  clusters: ScenarioClusterAudit[];
   validFonts: ParsedFont[];
   chain: ChainEntry[];
   unselected: { name: string; preference: number }[];
@@ -29,6 +30,8 @@ interface ResultsPanelProps {
   hasText: boolean;
   useMeasured: boolean;
   resilience: FailureScenario[];
+  /** 场景 id -> 显示名（补字预算规划的逐场景统计用） */
+  scenarioNames?: Map<string, string>;
 }
 
 /** 结果区：概览、回退链、缺失告警、字素簇明细、导出 */
@@ -46,6 +49,7 @@ export default function ResultsPanel(props: ResultsPanelProps) {
     hasText,
     useMeasured,
     resilience,
+    scenarioNames,
   } = props;
 
   const [filter, setFilter] = useState<ClusterFilter>('all');
@@ -209,6 +213,16 @@ export default function ResultsPanel(props: ResultsPanelProps) {
           />
         </section>
       )}
+
+      <section className="block">
+        <PatchPlannerPanel
+          clusters={clusters}
+          validFonts={validFonts}
+          auditInput={auditInput}
+          generatedAt={generatedAt}
+          scenarioNames={scenarioNames}
+        />
+      </section>
 
       <section className="block">
         <BaselineCompare

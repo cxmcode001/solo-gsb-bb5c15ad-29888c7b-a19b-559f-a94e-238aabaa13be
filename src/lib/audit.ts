@@ -2,6 +2,7 @@ import type { ClusterAudit, ParsedFont, ScenarioClusterAudit } from '../types';
 import { countCodepoints } from './ranges';
 import { formatCodepoint } from './grapheme';
 import type { FailureScenario } from './resilience';
+import type { PatchPlan } from './patchPlanner';
 
 /** 转义 CSS 字符串中的引号与反斜杠 */
 export function cssStringEscape(name: string): string {
@@ -425,6 +426,88 @@ export function buildResilienceReport(
         toFont: fontName(c.toFont),
       })),
       stillMissingCount: s.stillMissing,
+    })),
+  };
+}
+
+/**
+ * 构建「补字预算规划」JSON 报告。
+ * 方案中的字体下标均为有效字体列表下标，此处统一映射回字体名称；
+ * 逐场景统计与逐轮明细附场景名与场景内下标（场景集模式）。
+ * 报告仅为规划建议：字体范围与回退链求解结果均未被修改。
+ */
+export function buildPatchPlanReport(
+  input: AuditInput,
+  plan: PatchPlan,
+  validFonts: ParsedFont[],
+  generatedAt: string,
+  scenarioNames?: Map<string, string>,
+) {
+  const fontName = (i: number) => validFonts[i]?.name ?? null;
+  const scenarioName = (id: string) =>
+    scenarioNames ? scenarioNames.get(id) ?? null : null;
+
+  return {
+    tool: 'unicode-font-fallback-audit',
+    analysis: 'patch-budget-plan',
+    version: 1,
+    mode: input.mode,
+    generatedAt,
+    options: {
+      lengthPriority: input.lengthPriority,
+      ignoreFormatCodepoints: input.ignoreFormatCodepoints,
+      useMeasuredCoverage: input.useMeasuredCoverage,
+      ...(input.mode === 'set'
+        ? { scenarios: input.scenarios.map((s) => s.name) }
+        : {}),
+    },
+    note: '补字方案仅为假想规划：未修改任何字体范围、回退链求解结果或审计数据。计费单位为不同的 (字体, 码位) 对。',
+    budget: {
+      maxNewPairs: plan.budget,
+      usedPairs: plan.usedPairs,
+      remainingPairs: plan.budget - plan.usedPairs,
+    },
+    summary: {
+      missingClusters: plan.missingBefore,
+      restoredClusters: plan.restoredCount,
+      stillMissingClusters: plan.stillMissingCount,
+      perScenario: plan.scenarioStats.map((s) => ({
+        scenario: scenarioName(s.scenarioId),
+        scenarioId: s.scenarioId,
+        missingBefore: s.missingBefore,
+        restored: s.restored,
+        stillMissing: s.stillMissing,
+      })),
+    },
+    /** 按字体归组的补码清单（字体顺序 = 偏好顺序） */
+    patchesByFont: plan.patchesByFont.map((g) => ({
+      font: fontName(g.fontIndex),
+      validFontIndex: g.fontIndex,
+      newPairs: g.pairs,
+      codepoints: g.codepoints.map(formatCodepoint),
+    })),
+    /** 逐轮贪心选择明细 */
+    rounds: plan.rounds.map((r) => ({
+      round: r.round,
+      scenario: scenarioName(r.scenarioId),
+      scenarioLocalIndex: r.localIndex,
+      clusterIndex: r.clusterIndex,
+      clusterText: r.clusterText,
+      font: fontName(r.fontIndex),
+      validFontIndex: r.fontIndex,
+      addedCodepoints: r.addedCodepoints.map(formatCodepoint),
+      addedPairs: r.addedPairs,
+      restoredClusters: r.restoredCount,
+      ratio: Number(r.ratio.toFixed(6)),
+      budgetUsedAfter: r.budgetUsedAfter,
+    })),
+    /** 预算内仍缺失的簇 */
+    unrecovered: plan.unrecovered.map((c) => ({
+      index: c.index,
+      scenario: scenarioName(c.scenarioId),
+      scenarioLocalIndex: c.localIndex,
+      text: c.text,
+      requiredCodepoints: c.required.map(formatCodepoint),
     })),
   };
 }
